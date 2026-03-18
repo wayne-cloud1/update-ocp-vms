@@ -1,6 +1,0 @@
-plugin: kubevirt
-host: https://api.ocp.squeeb.me:6443
-validate_certs: false
-namespace: aap
-# label_selectors:
-#   - app=production
