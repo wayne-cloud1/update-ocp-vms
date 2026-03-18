@@ -1,0 +1,61 @@
+---
+- name: Update packages on OpenShift Virtual Machines (guest VMs)
+  hosts: openshift_vms
+  # ^^^ Replace with your inventory group (e.g. 'openshift_vms' or use a dynamic inventory
+  #     from the KubeVirt Ansible collection that targets VMs in OpenShift Virtualization)
+  remote_user: rhel   # ansible   # or whatever user you configured via cloud-init / SSH key injection
+  become: true
+  gather_facts: true
+  vars:
+    reboot_if_kernel_updated: true   # Set to false if you want to skip automatic reboot
+
+  tasks:
+    - name: Gather package facts (required for kernel change detection)
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Update package cache (Red Hat family)
+      ansible.builtin.dnf:
+        update_cache: true
+      when: ansible_os_family == "RedHat"
+
+    - name: Upgrade all packages (Red Hat family - RHEL, CentOS, Rocky, Alma, etc.)
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_cache: false   # already done above
+      register: dnf_upgrade
+      when: ansible_os_family == "RedHat"
+
+    - name: Update package cache and upgrade (Debian/Ubuntu family - just in case)
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        autoremove: true
+      register: apt_upgrade
+      when: ansible_os_family == "Debian"
+
+    - name: Check if kernel was updated (Red Hat)
+      ansible.builtin.set_fact:
+        kernel_updated: >-
+          {{ dnf_upgrade.results | selectattr('name', 'search', '^kernel') | list | length > 0 }}
+      when: ansible_os_family == "RedHat" and reboot_if_kernel_updated
+
+    - name: Check if kernel was updated (Debian)
+      ansible.builtin.set_fact:
+        kernel_updated: >-
+          {{ apt_upgrade.changed and (apt_upgrade.stdout is search('linux-image') or apt_upgrade.stdout is search('linux-kernel')) }}
+      when: ansible_os_family == "Debian" and reboot_if_kernel_updated
+
+    - name: Reboot VM if kernel was updated
+      ansible.builtin.reboot:
+        msg: "Reboot triggered by Ansible package update (kernel changed)"
+        post_reboot_delay: 30
+        test_command: whoami
+      when: kernel_updated | default(false)
+
+    - name: Wait for SSH to come back after reboot
+      ansible.builtin.wait_for_connection:
+        delay: 10
+        timeout: 300
+      when: kernel_updated | default(false)
