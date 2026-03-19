@@ -3,7 +3,7 @@
   hosts: all  # openshift_vms
   # ^^^ Replace with your inventory group (e.g. 'openshift_vms' or use a dynamic inventory
   #     from the KubeVirt Ansible collection that targets VMs in OpenShift Virtualization)
-  remote_user: rhel   # ansible   # or whatever user you configured via cloud-init / SSH key injection
+  remote_user: rhel   # ansible
   become: true
   gather_facts: true
   vars:
@@ -23,7 +23,7 @@
       ansible.builtin.dnf:
         name: "*"
         state: latest
-        update_cache: false   # already done above
+        update_cache: false
       register: dnf_upgrade
       when: ansible_os_family == "RedHat"
 

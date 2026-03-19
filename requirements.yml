@@ -1,0 +1,7 @@
+collections:
+  - name: kubevirt.core
+    version: ">=2.0.0"   # or latest, e.g. ">=2.2.3" as of early 2026
+  # - name: redhat.openshift
+  #   version: ">=1.2.0"
+  # - name: redhat.openshift_virtualization
+  #   version: ">=1.2.0"   # or latest, e.g. ">=1.2.0" as of early 2026

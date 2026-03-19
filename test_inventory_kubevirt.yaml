@@ -1,0 +1,10 @@
+---
+plugin: kubevirt.core.kubevirt # redhat.openshift_virtualization
+connections:
+  - kubeconfig: ~/.kube/kubeconfig
+  # - host: "api.ocp.squeeb.me:6443" # "https://api.ocp.squeeb.me:6443"
+    validate_certs: false
+    # api_key: "53321ebe77ba6a617bde2e868c811d8c53db2ad6" #"{{ lookup('env', 'KBS_AUTH_API_KEY') }}"
+    namespace: aap
+  # label_selectors:
+  #   - app=production
