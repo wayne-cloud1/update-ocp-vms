@@ -27,6 +27,11 @@
       register: dnf_upgrade
       when: ansible_os_family == "RedHat"
 
+    - name: Show results of DNF upgrade (for debugging)
+      ansible.builtin.debug:
+        var: dnf_upgrade.results
+      when: ansible_os_family == "RedHat"
+
     - name: Update package cache and upgrade (Debian/Ubuntu family - just in case)
       ansible.builtin.apt:
         update_cache: true
