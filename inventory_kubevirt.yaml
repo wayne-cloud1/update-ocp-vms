@@ -5,5 +5,7 @@ connections:
   # host: https://api.ocp.squeeb.me:6443
     validate_certs: false
     namespace: aap
+    # network_name: default
+    #use_service: true
   # label_selectors:
   #   - app=production
